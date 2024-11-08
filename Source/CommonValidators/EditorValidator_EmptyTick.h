@@ -9,8 +9,8 @@ class COMMONVALIDATORS_API UEditorValidator_EmptyTick : public UEditorValidatorB
 {
 	GENERATED_BODY()
 	
-	virtual bool CanValidateAsset_Implementation(const FAssetData& InAssetData, UObject* InObject, FDataValidationContext& InContext) const override;
-	virtual EDataValidationResult ValidateLoadedAsset_Implementation(const FAssetData& InAssetData, UObject* InAsset, FDataValidationContext& Context) override;
+	virtual bool CanValidateAsset_Implementation(UObject* InObject) const override;
+	virtual EDataValidationResult ValidateLoadedAsset_Implementation(UObject* InAsset, TArray<FText>& ValidationErrors) override;
 
 	bool IsEmptyTick(class UK2Node_Event* EventNode);
 };

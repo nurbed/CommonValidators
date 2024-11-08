@@ -1,7 +1,6 @@
 
 #include "EditorValidator_EmptyTick.h"
 
-#include "Misc/DataValidation.h"
 #include "Engine/Blueprint.h"
 #include "EdGraph/EdGraph.h"
 #include "EdGraph/EdGraphNode.h"
@@ -9,12 +8,12 @@
 #include "K2Node_Event.h"
 #include "Engine/MemberReference.h"
 
-bool UEditorValidator_EmptyTick::CanValidateAsset_Implementation(const FAssetData& InAssetData, UObject* InObject, FDataValidationContext& InContext) const
+bool UEditorValidator_EmptyTick::CanValidateAsset_Implementation(UObject* InObject) const
 {
 	return InObject && InObject->IsA<UBlueprint>();
 }
 
-EDataValidationResult UEditorValidator_EmptyTick::ValidateLoadedAsset_Implementation(const FAssetData& InAssetData, UObject* InAsset, FDataValidationContext& Context)
+EDataValidationResult UEditorValidator_EmptyTick::ValidateLoadedAsset_Implementation(UObject* InAsset, TArray<FText>& ValidationErrors)
 {
 	static const FName EventTickName(TEXT("ReceiveTick"));
 
@@ -30,7 +29,7 @@ EDataValidationResult UEditorValidator_EmptyTick::ValidateLoadedAsset_Implementa
 			{
 				if (IsEmptyTick(EventNode))
 				{
-					Context.AddError(FText::FromString(TEXT("Empty Tick nodes still produce overhead, please use or remove it.")));
+					ValidationErrors.Add(FText::FromString(TEXT("Empty Tick nodes still produce overhead, please use or remove it.")));
 					return EDataValidationResult::Invalid;
 				}
 			}
@@ -45,5 +44,5 @@ bool UEditorValidator_EmptyTick::IsEmptyTick(UK2Node_Event* EventNode)
 	if (EventNode->IsAutomaticallyPlacedGhostNode()) return false; // Ghost nodes aren't real nodes
 
 	UEdGraphPin* ExecThenPin = EventNode->FindPin(UEdGraphSchema_K2::PN_Then);
-	return ExecThenPin && ExecThenPin->LinkedTo.IsEmpty();
+	return ExecThenPin && ExecThenPin->LinkedTo.Num() == 0;
 }
