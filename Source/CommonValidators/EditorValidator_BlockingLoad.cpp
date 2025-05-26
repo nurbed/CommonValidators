@@ -43,6 +43,8 @@ EDataValidationResult UEditorValidator_BlockingLoad::ValidateLoadedAsset_Impleme
 					false
 				));
 
+				Context.AddMessage(TokenizedMessage);
+
 				bFoundBlockingLoad = true;
 			}
 		}
@@ -54,16 +56,21 @@ EDataValidationResult UEditorValidator_BlockingLoad::ValidateLoadedAsset_Impleme
 bool UEditorValidator_BlockingLoad::IsBlockingLoad(UEdGraphNode* Node)
 {
 	UK2Node_CallFunction* CallFunctionNode = Cast<UK2Node_CallFunction>(Node);
-	
+	static const FName LoadAssetBlockingFunctionName(TEXT("LoadAsset_Blocking"));
+	static const FName LoadClassAssetBlockingFunctionName(TEXT("LoadClassAsset_Blocking"));
+
+
+
+
 	if (!CallFunctionNode)
 	{
-		// Not a function call node
+		//not a function call node
 		return false;
 	}
 
-	static const FName LoadAssetBlockingFunctionName(TEXT("LoadAsset_Blocking"));
-	static const FName LoadClassAssetBlockingFunctionName(TEXT("LoadClassAsset_Blocking"));
 	FName FunctionName = CallFunctionNode->GetFunctionName();
+
+	//for debugging print function name
 
 	if (FunctionName == LoadAssetBlockingFunctionName)
 	{
@@ -74,6 +81,7 @@ bool UEditorValidator_BlockingLoad::IsBlockingLoad(UEdGraphNode* Node)
 	{
 		return true;
 	}
+
 
 	// Not a blocking (synchronous) loading function
 	return false;
