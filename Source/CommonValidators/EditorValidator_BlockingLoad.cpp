@@ -8,6 +8,7 @@
 #include "EdGraphSchema_K2.h"
 #include "K2Node_Event.h"
 #include "Engine/MemberReference.h"
+#include "CommonValidatorsStatics.h"
 #include "K2Node_CallFunction.h"
 
 bool UEditorValidator_BlockingLoad::CanValidateAsset_Implementation(const FAssetData& InAssetData, UObject* InObject, FDataValidationContext& InContext) const
@@ -20,6 +21,7 @@ EDataValidationResult UEditorValidator_BlockingLoad::ValidateLoadedAsset_Impleme
 	UBlueprint* Blueprint = Cast<UBlueprint>(InAsset);
 	if (!Blueprint) return EDataValidationResult::NotValidated;
 
+	bool bFoundBlockingLoad = false;
 	EDataValidationResult DataValidationResult = EDataValidationResult::Valid;
 
 	for (UEdGraph* Graph : Blueprint->UbergraphPages)
@@ -28,13 +30,25 @@ EDataValidationResult UEditorValidator_BlockingLoad::ValidateLoadedAsset_Impleme
 		{
 			if (IsBlockingLoad(Node))
 			{
-				Context.AddError(FText::FromString(TEXT("Blocking (synchronous) loading nodes will produce a hitch, use an asynchronous version instead.")));
-				DataValidationResult = EDataValidationResult::Invalid;
+				// Create a tokenized message with an action to open the Blueprint and focus the node
+				TSharedRef<FTokenizedMessage> TokenizedMessage = FTokenizedMessage::Create(EMessageSeverity::Warning, FText::FromString(TEXT("Blocking (synchronous) loading nodes found.")));
+
+				TokenizedMessage->AddToken(FActionToken::Create(
+					FText::FromString(TEXT("Open Blueprint and Focus Node")),
+					FText::FromString(TEXT("Open Blueprint and Focus Node")),
+					FOnActionTokenExecuted::CreateLambda([Blueprint, Graph, Node]()
+						{
+							UCommonValidatorsStatics::OpenBlueprintAndFocusNode(Blueprint, Graph, Node);
+						}),
+					false
+				));
+
+				bFoundBlockingLoad = true;
 			}
 		}
 	}
 
-	return DataValidationResult;
+	return bFoundBlockingLoad ? EDataValidationResult::Invalid : EDataValidationResult::Valid;
 }
 
 bool UEditorValidator_BlockingLoad::IsBlockingLoad(UEdGraphNode* Node)
