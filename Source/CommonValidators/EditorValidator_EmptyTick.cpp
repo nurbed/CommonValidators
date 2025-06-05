@@ -11,7 +11,12 @@
 
 bool UEditorValidator_EmptyTick::CanValidateAsset_Implementation(const FAssetData& InAssetData, UObject* InObject, FDataValidationContext& InContext) const
 {
+#if ENGINE_MAJOR_VERSION > 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 6)
+	// Empty ticks are automatically disabled in UE 5.6 onwards, no need to do anything for those versions
+	return false;
+#else
 	return InObject && InObject->IsA<UBlueprint>();
+#endif
 }
 
 EDataValidationResult UEditorValidator_EmptyTick::ValidateLoadedAsset_Implementation(const FAssetData& InAssetData, UObject* InAsset, FDataValidationContext& Context)
