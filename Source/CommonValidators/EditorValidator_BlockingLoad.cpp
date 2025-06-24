@@ -64,13 +64,11 @@ bool UEditorValidator_BlockingLoad::IsBlockingLoad(UEdGraphNode* Node)
 
 	if (!CallFunctionNode)
 	{
-		//not a function call node
+		// Not a function call node
 		return false;
 	}
 
 	FName FunctionName = CallFunctionNode->GetFunctionName();
-
-	//for debugging print function name
 
 	if (FunctionName == LoadAssetBlockingFunctionName)
 	{

@@ -13,7 +13,7 @@ public class CommonValidators : ModuleRules
 			"DataValidation",
 			"BlueprintGraph",
 			"Kismet",
-            "UnrealEd"
-        });
+			"UnrealEd"
+		});
 	}
 }

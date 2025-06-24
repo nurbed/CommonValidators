@@ -28,9 +28,9 @@ EDataValidationResult UEditorValidator_PureNode::ValidateLoadedAsset_Implementat
 		for (UEdGraphNode* Node : Graph->Nodes)
 		{
 			UK2Node* PureNode = Cast<UK2Node>(Node);
-			//if is a "UK2Node_BreakStruct" continue, these can't take 'show exec pins' anyhow
+			// If is a "UK2Node_BreakStruct" continue, these can't take 'show exec pins' anyhow
 			if (Node->IsA(UK2Node_BreakStruct::StaticClass())) continue;
-			// questionable, but we don't want to show warnings for variable nodes, although they can take show exec pins and might have 'split pins'
+			// Questionable, but we don't want to show warnings for variable nodes, although they can take show exec pins and might have 'split pins'
 			if (Node->IsA(UK2Node_Variable::StaticClass())) continue;
 			if (PureNode && PureNode->IsNodePure())
 			{
@@ -42,7 +42,7 @@ EDataValidationResult UEditorValidator_PureNode::ValidateLoadedAsset_Implementat
 					PureNode->ErrorType = EMessageSeverity::Warning;
 					PureNode->bHasCompilerMessage = true;
 					
-					//create tokenized message with action using UCommonValidatorsStatics::OpenBlueprintAndFocusNode
+					// Create tokenized message with action using UCommonValidatorsStatics::OpenBlueprintAndFocusNode
 					TSharedRef<FTokenizedMessage> TokenizedMessage = FTokenizedMessage::Create(EMessageSeverity::Warning, output);
 					TokenizedMessage->AddToken(FActionToken::Create(
 						FText::FromString(TEXT("Open Blueprint and Focus Node")),
@@ -75,7 +75,7 @@ bool UEditorValidator_PureNode::IsMultiPinPureNode(UK2Node* PureNode)
 	int PinConnectionCount = 0;
 	for (UEdGraphPin* Pin : PureNode->Pins)
 	{
-		//if we're an output pin and we have a connection in the graph - this counts.
+		// If we're an output pin and we have a connection in the graph - this counts.
 		if (Pin->Direction == EGPD_Output && Pin->LinkedTo.Num() > 0)
 		{
 			PinConnectionCount++;
