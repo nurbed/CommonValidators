@@ -27,8 +27,6 @@ EDataValidationResult UEditorValidator_EmptyTick::ValidateLoadedAsset_Implementa
 	UBlueprint* Blueprint = Cast<UBlueprint>(InAsset);
 	if (!Blueprint) return EDataValidationResult::NotValidated;
 
-	bool bFoundEmptyTick = false;
-
 	for (UEdGraph* Graph : Blueprint->UbergraphPages)
 	{
 		for (UEdGraphNode* Node : Graph->Nodes)
@@ -38,7 +36,7 @@ EDataValidationResult UEditorValidator_EmptyTick::ValidateLoadedAsset_Implementa
 			{
 				if (IsEmptyTick(EventNode))
 				{
-					//add message, with two actions: one to open the blueprint and focus the node, and one to remove the empty tick node
+					// add message, with two actions: one to open the blueprint and focus the node, and one to remove the empty tick node
 					TSharedRef<FTokenizedMessage> TokenizedMessage = FTokenizedMessage::Create(EMessageSeverity::Warning, FText::FromString(TEXT("Empty Tick nodes still produce overhead, please use or remove it. ")));
 					TokenizedMessage->AddToken(FActionToken::Create(
 						FText::FromString(TEXT("Open Blueprint and Focus Node")),
@@ -62,13 +60,13 @@ EDataValidationResult UEditorValidator_EmptyTick::ValidateLoadedAsset_Implementa
 
 					Context.AddMessage(TokenizedMessage);
 					
-					bFoundEmptyTick = true;
+					return EDataValidationResult::Invalid;
 				}
 			}
 		}
 	}
 
-	return bFoundEmptyTick ? EDataValidationResult::Invalid : EDataValidationResult::Valid;
+	return EDataValidationResult::Valid;
 }
 
 bool UEditorValidator_EmptyTick::IsEmptyTick(UK2Node_Event* EventNode)

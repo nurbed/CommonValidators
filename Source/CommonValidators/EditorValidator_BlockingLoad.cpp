@@ -45,12 +45,12 @@ EDataValidationResult UEditorValidator_BlockingLoad::ValidateLoadedAsset_Impleme
 
 				Context.AddMessage(TokenizedMessage);
 
-				bFoundBlockingLoad = true;
+				DataValidationResult = EDataValidationResult::Invalid;
 			}
 		}
 	}
 
-	return bFoundBlockingLoad ? EDataValidationResult::Invalid : EDataValidationResult::Valid;
+	return DataValidationResult;
 }
 
 bool UEditorValidator_BlockingLoad::IsBlockingLoad(UEdGraphNode* Node)
