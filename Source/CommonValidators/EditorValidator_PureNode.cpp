@@ -8,6 +8,7 @@
 #include "K2Node_BreakStruct.h"
 #include "K2Node_Variable.h"
 #include "CommonValidatorsStatics.h"
+
 #include "K2Node.h"
 
 
@@ -34,7 +35,7 @@ EDataValidationResult UEditorValidator_PureNode::ValidateLoadedAsset_Implementat
 			if (Node->IsA(UK2Node_Variable::StaticClass())) continue;
 			if (PureNode && PureNode->IsNodePure())
 			{
-				if (IsMultiPinPureNode(PureNode))
+				if (IsMultiPinPureNode(PureNode) && !IsWhitelistedPureNode(PureNode))
 				{
 					FText output = FText::Join(FText::FromString(" "), PureNode->GetNodeTitle(ENodeTitleType::Type::MenuTitle), FText::FromString(" - "), FText::FromString(TEXT("MultiPin Pure Nodes actually get called for each connected pin output.")));
 
@@ -83,4 +84,21 @@ bool UEditorValidator_PureNode::IsMultiPinPureNode(UK2Node* PureNode)
 	}
 	
 	return PinConnectionCount > 1;
+}
+
+bool UEditorValidator_PureNode::IsWhitelistedPureNode(UK2Node* PureNode)
+{
+	static const TArray<UClass*> WhitelistedTypes = {
+		UK2Node_BreakStruct::StaticClass()
+		// Add here any other classes that should be whitelisted
+	};
+
+	for (UClass* WhitelistedClass : WhitelistedTypes)
+	{
+		if (PureNode->IsA(WhitelistedClass))
+		{
+			return true;
+		}
+	}
+	return false;
 }

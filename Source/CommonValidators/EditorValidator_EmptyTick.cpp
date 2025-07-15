@@ -1,6 +1,7 @@
 
 #include "EditorValidator_EmptyTick.h"
 
+#include "Runtime/Launch/Resources/Version.h"
 #include "Misc/DataValidation.h"
 #include "Engine/Blueprint.h"
 #include "EdGraph/EdGraph.h"

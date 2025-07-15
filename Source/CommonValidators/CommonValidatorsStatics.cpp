@@ -8,7 +8,7 @@
 
 #include "EdGraph/EdGraph.h"
 #include "EdGraph/EdGraphNode.h"
-
+#include "ScopedTransaction.h"
 
 void UCommonValidatorsStatics::OpenBlueprintAndFocusNode(UBlueprint* Blueprint, UEdGraph* Graph, UEdGraphNode* Node)
 {
