@@ -8,6 +8,7 @@
 #include "EdGraph/EdGraphNode.h"
 #include "EdGraphSchema_K2.h"
 #include "K2Node_Event.h"
+#include "CommonValidatorsStatics.h"
 #include "Engine/MemberReference.h"
 
 bool UEditorValidator_EmptyTick::CanValidateAsset_Implementation(const FAssetData& InAssetData, UObject* InObject, FDataValidationContext& InContext) const
@@ -36,7 +37,30 @@ EDataValidationResult UEditorValidator_EmptyTick::ValidateLoadedAsset_Implementa
 			{
 				if (IsEmptyTick(EventNode))
 				{
-					Context.AddError(FText::FromString(TEXT("Empty Tick nodes still produce overhead, please use or remove it.")));
+					// add message, with two actions: one to open the blueprint and focus the node, and one to remove the empty tick node
+					TSharedRef<FTokenizedMessage> TokenizedMessage = FTokenizedMessage::Create(EMessageSeverity::Warning, FText::FromString(TEXT("Empty Tick nodes still produce overhead, please use or remove it. ")));
+					TokenizedMessage->AddToken(FActionToken::Create(
+						FText::FromString(TEXT("Open Blueprint and Focus Node")),
+						FText::FromString(TEXT("Open Blueprint and Focus Node")),
+						FOnActionTokenExecuted::CreateLambda([Blueprint, Graph, EventNode]()
+							{
+								UCommonValidatorsStatics::OpenBlueprintAndFocusNode(Blueprint, Graph, EventNode);
+							}),
+						false
+					));
+
+					TokenizedMessage->AddToken(FActionToken::Create(
+						FText::FromString(TEXT("Remove Empty Tick Node")),
+						FText::FromString(TEXT("Remove Empty Tick Node")),
+						FOnActionTokenExecuted::CreateLambda([Blueprint, Graph, EventNode]()
+							{
+								UCommonValidatorsStatics::DeleteNodeFromBlueprint(Blueprint, Graph, EventNode);
+							}),
+						false
+					));
+
+					Context.AddMessage(TokenizedMessage);
+					
 					return EDataValidationResult::Invalid;
 				}
 			}
