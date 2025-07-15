@@ -21,7 +21,6 @@ EDataValidationResult UEditorValidator_BlockingLoad::ValidateLoadedAsset_Impleme
 	UBlueprint* Blueprint = Cast<UBlueprint>(InAsset);
 	if (!Blueprint) return EDataValidationResult::NotValidated;
 
-	bool bFoundBlockingLoad = false;
 	EDataValidationResult DataValidationResult = EDataValidationResult::Valid;
 
 	for (UEdGraph* Graph : Blueprint->UbergraphPages)
@@ -56,11 +55,6 @@ EDataValidationResult UEditorValidator_BlockingLoad::ValidateLoadedAsset_Impleme
 bool UEditorValidator_BlockingLoad::IsBlockingLoad(UEdGraphNode* Node)
 {
 	UK2Node_CallFunction* CallFunctionNode = Cast<UK2Node_CallFunction>(Node);
-	static const FName LoadAssetBlockingFunctionName(TEXT("LoadAsset_Blocking"));
-	static const FName LoadClassAssetBlockingFunctionName(TEXT("LoadClassAsset_Blocking"));
-
-
-
 
 	if (!CallFunctionNode)
 	{
@@ -68,6 +62,8 @@ bool UEditorValidator_BlockingLoad::IsBlockingLoad(UEdGraphNode* Node)
 		return false;
 	}
 
+	static const FName LoadAssetBlockingFunctionName(TEXT("LoadAsset_Blocking"));
+	static const FName LoadClassAssetBlockingFunctionName(TEXT("LoadClassAsset_Blocking"));
 	FName FunctionName = CallFunctionNode->GetFunctionName();
 
 	if (FunctionName == LoadAssetBlockingFunctionName)
