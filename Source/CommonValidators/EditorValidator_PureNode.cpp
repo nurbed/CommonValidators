@@ -5,6 +5,7 @@
 #include "EdGraph/EdGraph.h"
 #include "EdGraph/EdGraphNode.h"
 #include "EdGraphSchema_K2.h"
+#include "K2Node_CallFunction.h"
 #include "K2Node_BreakStruct.h"
 #include "K2Node_Variable.h"
 #include "CommonValidatorsStatics.h"
