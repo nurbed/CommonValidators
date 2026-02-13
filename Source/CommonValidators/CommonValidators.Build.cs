@@ -11,7 +11,11 @@ public class CommonValidators : ModuleRules
 			"CoreUObject",
 			"Engine",
 			"DataValidation",
-			"BlueprintGraph"
+			"BlueprintGraph",
+			"DeveloperSettings",
+			"Kismet",
+			"UnrealEd",
+			"AssetManagerEditor"
 		});
 	}
 }
