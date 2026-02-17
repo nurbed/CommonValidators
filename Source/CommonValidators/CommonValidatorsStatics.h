@@ -1,5 +1,8 @@
 #pragma once
+
 #include "Kismet/BlueprintFunctionLibrary.h"
+#include "Logging/TokenizedMessage.h"
+#include "AssetRegistry/AssetIdentifier.h"
 
 #include "CommonValidatorsStatics.generated.h"
 

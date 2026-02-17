@@ -1,5 +1,8 @@
 #pragma once
 
+#include "CoreMinimal.h"
+#include "Templates/SubclassOf.h"
+#include "Animation/AnimBlueprint.h"
 #include "Engine/DeveloperSettings.h"
 
 #include "CommonValidatorsDeveloperSettings.generated.h"
