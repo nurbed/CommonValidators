@@ -1,18 +1,13 @@
 #pragma once
 
-// Unreal
 #include "EditorValidatorBase.h"
 #include "AssetRegistry/IAssetRegistry.h"
-
-// Local
+#include "AssetManagerEditorModule.h"
 #include "CommonValidatorsDeveloperSettings.h"
 
-// Gen
 #include "EditorValidator_HeavyReference.generated.h"
 
-/**
- *
- */
+
 UCLASS()
 class COMMONVALIDATORS_API UEditorValidator_HeavyReference : public UEditorValidatorBase
 {
