@@ -34,34 +34,15 @@ namespace UE::Internal::PureNodeValidatorHelpers
 		{
 			return false;
 		}
-		
-		const FString OwnerName = OwnerClass->GetName();
 
-		if (OwnerName.Contains(TEXT("KismetMathLibrary")) ||
-			OwnerName.Contains(TEXT("KismetSystemLibrary")) ||
-			OwnerName.Contains(TEXT("KismetTextLibrary")) ||
-			OwnerName.Contains(TEXT("KismetStringTableLibrary")) ||
-			OwnerName.Contains(TEXT("KismetRenderingLibrary")) ||
-			OwnerName.Contains(TEXT("KismetMaterialLibrary")) ||
-			OwnerName.Contains(TEXT("KismetInternationalizationLibrary")) ||
-			OwnerName.Contains(TEXT("KismetInputLibrary")) ||
-			OwnerName.Contains(TEXT("KismetGuidLibrary")) ||
-			OwnerName.Contains(TEXT("KismetArrayLibrary")) ||
-			OwnerName.Contains(TEXT("GameplayStatics")) ||
-			OwnerName.Contains(TEXT("DataTableFunctionLibrary")) ||
-			OwnerName.Contains(TEXT("BlueprintSetLibrary")) ||
-			OwnerName.Contains(TEXT("BlueprintPlatformLibrary")) ||
-			OwnerName.Contains(TEXT("BlueprintPathsLibrary")) ||
-			OwnerName.Contains(TEXT("BlueprintMapLibrary")) ||
-			OwnerName.Contains(TEXT("BlueprintInstancedStructLibrary")) ||
-			OwnerName.Contains(TEXT("KismetNodeHelperLibrary")))
+	    // check the user settings for classes that should be treated as harmless
+		if (GetDefault<UCommonValidatorsDeveloperSettings>()->PureNodeValidatorHarmlessClasses.ContainsByPredicate([&](const FCommonValidatorClassArray &CommonValidatorClassArray)
+		{
+		   return CommonValidatorClassArray.MatchesClass(OwnerClass);	    
+		}))
 		{
 			return true;
 		}
-
-		//TODO: Allow users to expand the list above? --KaosSpectrum
-		//Maybe find a better way (though i can't think of one...)
-		
 
 		return false;
 	}

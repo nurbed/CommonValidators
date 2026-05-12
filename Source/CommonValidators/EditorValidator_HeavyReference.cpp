@@ -47,11 +47,11 @@ bool UEditorValidator_HeavyReference::CanValidateAsset_Implementation(
 	// Check if we want to run validation here
 	// Remove any BPs that inherit from the classes in class and child list
 	{
-		const TArray<TSubclassOf<UObject>>& IgnoreChildrenList = GetDefault<UCommonValidatorsDeveloperSettings>()->
+		const TArray<TSoftClassPtr<UObject>>& IgnoreChildrenList = GetDefault<UCommonValidatorsDeveloperSettings>()->
 			HeavyValidatorClassAndChildIgnoreList;
-		for (const TSubclassOf<UObject>& IgnoredChild : IgnoreChildrenList)
+		for (const TSoftClassPtr<UObject>& IgnoredChild : IgnoreChildrenList)
 		{
-			if (UCommonValidatorsStatics::IsObjectAChildOf(InObject, IgnoredChild))
+			if (IgnoredChild.IsValid() && UCommonValidatorsStatics::IsObjectAChildOf(InObject, IgnoredChild.Get()))
 			{
 				return false;
 			}
@@ -80,10 +80,10 @@ EDataValidationResult UEditorValidator_HeavyReference::ValidateLoadedAsset_Imple
 
 	// Remove any BPs that inherit from the classes in class and child list
 	{
-		const TArray<TSubclassOf<UObject>>& IgnoreChildrenList = DevSettings->HeavyValidatorClassAndChildIgnoreList;
-		for (const TSubclassOf<UObject>& IgnoredChild : IgnoreChildrenList)
+		const TArray<TSoftClassPtr<UObject>>& IgnoreChildrenList = DevSettings->HeavyValidatorClassAndChildIgnoreList;
+		for (const TSoftClassPtr<UObject>& IgnoredChild : IgnoreChildrenList)
 		{
-			if (UCommonValidatorsStatics::IsObjectAChildOf(InAsset, IgnoredChild))
+			if (IgnoredChild.IsValid() && UCommonValidatorsStatics::IsObjectAChildOf(InAsset, IgnoredChild.Get()))
 			{
 				return EDataValidationResult::NotValidated;
 			}
@@ -170,7 +170,7 @@ EDataValidationResult UEditorValidator_HeavyReference::ValidateLoadedAsset_Imple
 				FText::Format(
 					LOCTEXT("CommonValidators.HeavyRef.AssetWarning", "Heavy references in asset {0}! ({1})"),
 					FText::FromString(InAssetIdentifier.ToString()),
-					TotalSize
+					FText::AsMemory(TotalSize)
 					),
 				(DevSettings->bErrorHeavyReference ? EMessageSeverity::Error : EMessageSeverity::PerformanceWarning)
 			);
@@ -187,17 +187,28 @@ bool UEditorValidator_HeavyReference::IsAssetIncluded(const UCommonValidatorsDev
 {
 	// Gather Specific Ref Classes to ignore for the root asset
 	TArray<TSubclassOf<UObject>, TInlineAllocator<8>> IgnoredClassList;
-	for (auto& ClassToIgnoreEntry : DevSettings->HeavyValidatorClassSpecificClassIgnoreList)
+	for (auto &ClassToIgnoreEntry : DevSettings->HeavyValidatorClassSpecificClassIgnoreList)
 	{
+		// we can skip unloaded classes
+		if(!ClassToIgnoreEntry.Key.IsValid())
+			continue;
+		
 		// Does this apply to this asset?
 		// Allowed on the root (idx0) and if propagation is set.
 		if (ClassToIgnoreEntry.Value.AllowPropagationToChildren)
 		{
-			const TSubclassOf<UObject> IgnoredClass = ClassToIgnoreEntry.Key;
+			const TSubclassOf<UObject> IgnoredClass = ClassToIgnoreEntry.Key.Get();
 
 			if (UCommonValidatorsStatics::IsObjectAChildOf(InAsset, IgnoredClass))
 			{
-				IgnoredClassList.Append(ClassToIgnoreEntry.Value.ClassList);
+				for(auto &SoftClassPtr : ClassToIgnoreEntry.Value.ClassList)
+				{
+					if(SoftClassPtr.IsValid())
+					{
+						IgnoredClassList.Add(SoftClassPtr.Get());
+					}
+				}
+				
 			}
 		}
 	}

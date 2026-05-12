@@ -29,32 +29,36 @@ EDataValidationResult UEditorValidator_BlockingLoad::ValidateLoadedAsset_Impleme
 	TArray<UEdGraph*> AllGraphs;
 	AllGraphs.Append(Blueprint->FunctionGraphs);
 	AllGraphs.Append(Blueprint->UbergraphPages);
+
+	const UCommonValidatorsDeveloperSettings *CommonValidatorSettings = GetDefault<UCommonValidatorsDeveloperSettings>();
+	const bool bShouldError = CommonValidatorSettings->bErrorBlockingLoad;
 	
     for (UEdGraph* Graph : AllGraphs)
 	{
 		for (UEdGraphNode* Node : Graph->Nodes)
 		{
-			if (IsBlockingLoad(Node))
-			{
-				bool bShouldError = GetDefault<UCommonValidatorsDeveloperSettings>()->bErrorBlockingLoad;
+			if (!IsBlockingLoad(Node))
+				continue;
 
-				// Create a tokenized message with an action to open the Blueprint and focus the node
-				TSharedRef<FTokenizedMessage> TokenizedMessage = FTokenizedMessage::Create((bShouldError ? EMessageSeverity::Error : EMessageSeverity::Warning), FText::FromString(TEXT("Blocking (synchronous) loading nodes found.")));
+			if (CommonValidatorSettings->bBlockingLoadIgnoreDisabledNodes && !Node->IsNodeEnabled())
+				continue;
 
-				TokenizedMessage->AddToken(FActionToken::Create(
-					FText::FromString(TEXT("Open Blueprint and Focus Node")),
-					FText::FromString(TEXT("Open Blueprint and Focus Node")),
-					FOnActionTokenExecuted::CreateLambda([Blueprint, Graph, Node]()
-						{
-							UCommonValidatorsStatics::OpenBlueprintAndFocusNode(Blueprint, Graph, Node);
-						}),
-					false
-				));
+			// Create a tokenized message with an action to open the Blueprint and focus the node
+			TSharedRef<FTokenizedMessage> TokenizedMessage = FTokenizedMessage::Create((bShouldError ? EMessageSeverity::Error : EMessageSeverity::Warning), FText::FromString(TEXT("Blocking (synchronous) loading nodes found.")));
 
-				Context.AddMessage(TokenizedMessage);
+			TokenizedMessage->AddToken(FActionToken::Create(
+				FText::FromString(TEXT("Open Blueprint and Focus Node")),
+				FText::FromString(TEXT("Open Blueprint and Focus Node")),
+				FOnActionTokenExecuted::CreateLambda([Blueprint, Graph, Node]()
+					{
+						UCommonValidatorsStatics::OpenBlueprintAndFocusNode(Blueprint, Graph, Node);
+					}),
+				false
+			));
 
-				DataValidationResult = bShouldError ? EDataValidationResult::Invalid : EDataValidationResult::Valid;
-			}
+			Context.AddMessage(TokenizedMessage);
+
+			DataValidationResult = bShouldError ? EDataValidationResult::Invalid : EDataValidationResult::Valid;			
 		}
 	}
 

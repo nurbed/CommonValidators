@@ -80,18 +80,10 @@ bool UCommonValidatorsStatics::IsObjectAChildOf(const UObject* const AnyAssetRef
 		return false;
 	}
 
-	// Blueprint assets derive from UBlueprint first, so IsA won't work directly
-	if (AnyAssetReference->IsA(UBlueprint::StaticClass()))
+	// Blueprint assets derive from UBlueprint first, so IsA won't work directly and the CDO can be used for the check 
+	if(const UBlueprint *Blueprint = Cast<UBlueprint>(AnyAssetReference))
 	{
-		// This asset may need converted to first native class unless ObjectClass is also a BP
-		const UBlueprint* const Blueprint = Cast<UBlueprint>(AnyAssetReference);
-		if (!IsValid(Blueprint))
-		{
-			return false;
-		}
-		
-		const UClass* const ParentClass = FBlueprintEditorUtils::FindFirstNativeClass(Blueprint->ParentClass);
-		if (ParentClass->IsChildOf(ObjectClass))
+		if(Blueprint->GeneratedClass && Blueprint->GeneratedClass->GetDefaultObject()->IsA(ObjectClass))
 		{
 			return true;
 		}
